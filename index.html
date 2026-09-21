@@ -1113,6 +1113,7 @@
     let energy = MAX_ENERGY;
     let day = 1;
     let weather = "normal";
+    let cloudyStreak = 0;
     let sangToday = false;
     let stage = 0;
     let won = false;
@@ -1438,9 +1439,18 @@
 
     function rollWeather() {
       const n = Math.random();
-      if (n < 0.3) return "cloudy";
-      if (n < 0.7) return "normal";
-      return "sunny";
+      let next;
+      if (cloudyStreak >= 2) {
+        next = n < 4 / 7 ? "normal" : "sunny";
+      } else if (n < 0.3) {
+        next = "cloudy";
+      } else if (n < 0.7) {
+        next = "normal";
+      } else {
+        next = "sunny";
+      }
+      cloudyStreak = next === "cloudy" ? cloudyStreak + 1 : 0;
+      return next;
     }
 
     function careRank() {
@@ -1540,6 +1550,7 @@
       energy = MAX_ENERGY;
       day = 1;
       weather = "normal";
+      cloudyStreak = 0;
       sangToday = false;
       stage = 0;
       won = false;
