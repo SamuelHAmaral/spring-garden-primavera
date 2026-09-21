@@ -334,9 +334,39 @@
     }
 
     .meter header span:last-child {
+      letter-spacing: 0;
+    }
+
+    .meter-read {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .meter-val {
+      font-variant-numeric: tabular-nums;
+      color: #9a6274;
+      min-width: 1.6em;
+      text-align: right;
+    }
+
+    .meter-delta {
       font-variant-numeric: tabular-nums;
       letter-spacing: 0;
-      color: #9a6274;
+      font-size: 0.72rem;
+      min-width: 2.2em;
+      text-align: right;
+      opacity: 0;
+    }
+
+    .meter-delta.pop.good { color: #3d8a4a; animation: meterDelta 1.8s ease forwards; }
+    .meter-delta.pop.bad { color: #c45c7a; animation: meterDelta 1.8s ease forwards; }
+
+    @keyframes meterDelta {
+      0% { opacity: 0; transform: translateY(3px); }
+      12% { opacity: 1; transform: none; }
+      72% { opacity: 1; }
+      100% { opacity: 0; }
     }
 
     .track {
@@ -836,35 +866,6 @@
       100% { opacity: 0; transform: translateY(-28px); }
     }
 
-    @keyframes floatFade {
-      0% { opacity: 0; transform: translate(-50%, 10px); }
-      14% { opacity: 1; transform: translate(-50%, 0); }
-      100% { opacity: 0; transform: translate(-50%, -38px); }
-    }
-
-    .float-notes {
-      position: absolute;
-      inset: 0;
-      z-index: 4;
-      pointer-events: none;
-      overflow: visible;
-    }
-
-    .float-note {
-      position: absolute;
-      left: 50%;
-      top: 22%;
-      font-size: 0.92rem;
-      font-weight: 800;
-      letter-spacing: 0.02em;
-      white-space: nowrap;
-      animation: floatFade 1.55s ease forwards;
-      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
-    }
-
-    .float-note.good { color: #3d8a4a; }
-    .float-note.bad { color: #c45c7a; }
-
     @keyframes beetleCrawl {
       0%, 100% { transform: rotate(-12deg) translate(0, 0); }
       50% { transform: rotate(10deg) translate(3px, 2px); }
@@ -902,7 +903,6 @@
         <div class="plant" id="plant" aria-live="polite">🌱</div>
         <span class="beetle" id="beetleBug" hidden aria-hidden="true">🪲</span>
         <span class="weeds" id="weedPatch" hidden aria-hidden="true">🌿🌿🌿</span>
-        <div class="float-notes" id="floatNotes" aria-hidden="true"></div>
       </div>
       <button class="tool shovel-tool" type="button" id="shovelTool" data-tool="shovel" aria-label="Shovel. Drag onto the flower to pull weeds.">
         <span class="shovel-art" aria-hidden="true">
@@ -915,35 +915,65 @@
 
     <section class="meters" id="meters" aria-label="Sunflower needs">
       <label class="meter">
-        <header><span>HP</span><span id="hpVal">100</span></header>
+        <header>
+          <span>HP</span>
+          <span class="meter-read">
+            <span class="meter-delta" id="hpDelta"></span>
+            <span class="meter-val" id="hpVal">100</span>
+          </span>
+        </header>
         <div class="track">
           <progress id="hpBar" max="100" value="100"></progress>
           <span class="fill hp-fill" id="hpFill" style="width: 100%"></span>
         </div>
       </label>
       <label class="meter">
-        <header><span>Water</span><span id="waterVal">30</span></header>
+        <header>
+          <span>Water</span>
+          <span class="meter-read">
+            <span class="meter-delta" id="waterDelta"></span>
+            <span class="meter-val" id="waterVal">30</span>
+          </span>
+        </header>
         <div class="track">
           <progress id="waterBar" max="100" value="30"></progress>
           <span class="fill water-fill" id="waterFill"></span>
         </div>
       </label>
       <label class="meter">
-        <header><span>Sun</span><span id="sunVal">30</span></header>
+        <header>
+          <span>Sun</span>
+          <span class="meter-read">
+            <span class="meter-delta" id="sunDelta"></span>
+            <span class="meter-val" id="sunVal">30</span>
+          </span>
+        </header>
         <div class="track">
           <progress id="sunBar" max="100" value="30"></progress>
           <span class="fill sun-fill" id="sunFill"></span>
         </div>
       </label>
       <label class="meter">
-        <header><span>Soil</span><span id="soilVal">100</span></header>
+        <header>
+          <span>Soil</span>
+          <span class="meter-read">
+            <span class="meter-delta" id="soilDelta"></span>
+            <span class="meter-val" id="soilVal">100</span>
+          </span>
+        </header>
         <div class="track">
           <progress id="soilBar" max="100" value="100"></progress>
           <span class="fill soil-fill" id="soilFill" style="width: 100%"></span>
         </div>
       </label>
       <label class="meter">
-        <header><span>Love</span><span id="loveVal">0</span></header>
+        <header>
+          <span>Love</span>
+          <span class="meter-read">
+            <span class="meter-delta" id="loveDelta"></span>
+            <span class="meter-val" id="loveVal">0</span>
+          </span>
+        </header>
         <div class="track">
           <progress id="loveBar" max="100" value="0"></progress>
           <span class="fill love-fill" id="loveFill"></span>
@@ -1134,6 +1164,11 @@
       sunVal: document.getElementById("sunVal"),
       soilVal: document.getElementById("soilVal"),
       loveVal: document.getElementById("loveVal"),
+      hpDelta: document.getElementById("hpDelta"),
+      waterDelta: document.getElementById("waterDelta"),
+      sunDelta: document.getElementById("sunDelta"),
+      soilDelta: document.getElementById("soilDelta"),
+      loveDelta: document.getElementById("loveDelta"),
       pips: document.getElementById("pips"),
       dayLabel: document.getElementById("dayLabel"),
       pailTicks: document.getElementById("pailTicks"),
@@ -1166,7 +1201,6 @@
       songScore: document.getElementById("songScore"),
       songTap: document.getElementById("songTap"),
       songPop: document.getElementById("songPop"),
-      floatNotes: document.getElementById("floatNotes"),
       petals: document.getElementById("petals")
     };
 
@@ -1367,24 +1401,21 @@
       changeStat(kind, gain);
     }
 
-    const STAT_NAME = {
-      hp: "HP",
-      water: "Water",
-      sun: "Sun",
-      soil: "Soil",
-      love: "Love"
-    };
-
-    function floatNote(text, good) {
-      if (!els.floatNotes) return;
-      const note = document.createElement("span");
-      note.className = "float-note " + (good ? "good" : "bad");
-      note.textContent = text;
-      note.style.top = 18 + els.floatNotes.childElementCount * 16 + "%";
-      els.floatNotes.appendChild(note);
-      setTimeout(function () {
-        if (note.parentNode) note.parentNode.removeChild(note);
-      }, 1650);
+    function showDelta(kind, actual) {
+      const el = els[kind + "Delta"];
+      if (!el || !actual) return;
+      const shown = (el.classList.contains("pop") ? Number(el.dataset.amt || 0) : 0) + actual;
+      el.dataset.amt = String(shown);
+      el.textContent = (shown > 0 ? "+" : "") + shown;
+      el.classList.remove("good", "bad", "pop");
+      void el.offsetWidth;
+      el.classList.add(shown > 0 ? "good" : "bad", "pop");
+      clearTimeout(el._hide);
+      el._hide = setTimeout(function () {
+        el.classList.remove("pop", "good", "bad");
+        el.dataset.amt = "";
+        el.textContent = "";
+      }, 1800);
     }
 
     function changeStat(kind, delta) {
@@ -1392,7 +1423,13 @@
       stats[kind] = clamp(stats[kind] + delta);
       const actual = stats[kind] - before;
       if (actual !== 0) {
-        floatNote((actual > 0 ? "+" : "") + actual + " " + STAT_NAME[kind], actual > 0);
+        const val = els[kind + "Val"];
+        const bar = els[kind + "Bar"];
+        const fill = els[kind + "Fill"];
+        if (val) val.textContent = stats[kind];
+        if (bar) bar.value = stats[kind];
+        if (fill) fill.style.width = stats[kind] + "%";
+        showDelta(kind, actual);
       }
       return actual;
     }
