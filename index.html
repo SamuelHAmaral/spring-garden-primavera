@@ -1393,8 +1393,10 @@
     function spendEnergy() {
       energy = clamp(energy - 1, MAX_ENERGY);
       const drain = isThriving() ? 0 : DRAIN;
-      stats.water = clamp(stats.water - drain);
-      stats.sun = clamp(stats.sun - drain);
+      if (drain) {
+        changeStat("water", -drain);
+        changeStat("sun", -drain);
+      }
     }
 
     function applyCare(kind, gain) {
