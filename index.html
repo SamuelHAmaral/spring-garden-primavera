@@ -555,6 +555,52 @@
       color: var(--deep);
     }
 
+    .finale .end-kicker,
+    .lost .end-kicker {
+      font-family: "Nunito", system-ui, sans-serif;
+      font-style: normal;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #b07888;
+      margin-bottom: 8px;
+    }
+
+    .rank-line {
+      font-family: "Nunito", system-ui, sans-serif !important;
+      font-style: normal !important;
+      margin-top: 14px;
+      font-size: 0.95rem !important;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #8a5264;
+    }
+
+    .rank {
+      display: inline-block;
+      margin-left: 6px;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 2rem;
+      font-style: italic;
+      line-height: 1;
+      color: var(--gold);
+    }
+
+    .rank.s { color: var(--gold); }
+    .rank.a { color: var(--deep); }
+    .rank.b { color: #c48a3a; }
+    .rank.c { color: #9a6274; }
+
+    .rank-sub {
+      font-family: "Nunito", system-ui, sans-serif !important;
+      font-style: normal !important;
+      font-size: 0.8rem !important;
+      color: #b07888;
+      margin-top: 4px;
+    }
+
     .retry-btn {
       margin-top: 16px;
       background: linear-gradient(180deg, #f39bb6, #e06b91);
@@ -580,7 +626,7 @@
 
     .board.won .finale,
     .board.lost .lost {
-      display: block;
+      display: block !important;
       animation: statusIn 0.7s ease;
     }
 
@@ -956,10 +1002,15 @@
     <p class="hint">Love grows the sunflower. 100 Love wins. Nights drop Water, Sun, and Soil. Empty bars hurt HP. Drag the spray can onto beetles and the shovel onto weeds.</p>
 
     <div class="finale" id="finale" hidden>
-      <p>Feliz Día de la Primavera! 🌻 You grew a beautiful sunflower, but you're still the prettiest one.</p>
+      <p class="end-kicker">You won</p>
+      <p id="winMsg">Feliz Día de la Primavera! 🌻 You grew a beautiful sunflower, but you're still the prettiest one.</p>
+      <p class="rank-line">Care rank <span class="rank s" id="winRank">S</span></p>
+      <p class="rank-sub" id="winRankSub">HP 100</p>
+      <button class="retry-btn" type="button" id="winRetry">Try again</button>
     </div>
 
     <div class="lost" id="lostBox" hidden>
+      <p class="end-kicker">Game over</p>
       <p id="lostMsg">The sunflower faded. Some loves need one more try.</p>
       <button class="retry-btn" type="button" id="retryBtn">Try again</button>
     </div>
@@ -1102,6 +1153,9 @@
       weedPatch: document.getElementById("weedPatch"),
       lostMsg: document.getElementById("lostMsg"),
       finale: document.getElementById("finale"),
+      winMsg: document.getElementById("winMsg"),
+      winRank: document.getElementById("winRank"),
+      winRankSub: document.getElementById("winRankSub"),
       lostBox: document.getElementById("lostBox"),
       songOverlay: document.getElementById("songOverlay"),
       songBar: document.getElementById("songBar"),
@@ -1351,13 +1405,19 @@
       return "sunny";
     }
 
+    function careRank() {
+      if (stats.hp >= 90) return "S";
+      if (stats.hp >= 75) return "A";
+      if (stats.hp >= 50) return "B";
+      return "C";
+    }
+
     function resolveAfterAction(options) {
       const prev = stage;
       stage = currentStage();
       const leveled = stage > prev;
       if (allMax()) {
-        render({ animate: true, status: true, message: options && options.message });
-        setTimeout(celebrate, 520);
+        celebrate();
         return;
       }
       if (isZero()) {
@@ -1386,7 +1446,12 @@
       lost = false;
       stage = 3;
       sleeping = false;
+      busy = false;
       stopSongAnim();
+      const rank = careRank();
+      els.winRank.textContent = rank;
+      els.winRank.className = "rank " + rank.toLowerCase();
+      els.winRankSub.textContent = "HP " + stats.hp;
       els.board.classList.remove("lost");
       els.board.classList.add("won");
       els.finale.hidden = false;
@@ -1961,7 +2026,9 @@
 
     els.fillBtn.addEventListener("click", fillPail);
     els.restBtn.addEventListener("click", rest);
-    document.getElementById("retryBtn").addEventListener("click", resetGame);
+    document.querySelectorAll(".retry-btn").forEach(function (btn) {
+      btn.addEventListener("click", resetGame);
+    });
     els.sprayTool.addEventListener("pointerdown", onToolPointerDown);
     els.sprayTool.addEventListener("pointermove", onToolPointerMove);
     els.sprayTool.addEventListener("pointerup", onToolPointerUp);
