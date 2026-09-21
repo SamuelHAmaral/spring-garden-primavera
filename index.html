@@ -1051,7 +1051,6 @@
     const SONG_SPEED_MULT = 1.51;
     const SONG_SPEED_MAX = 4.56;
     const SONG_ZONE = 0.07;
-    const SONG_GRACE_MS = 0;
     const SONG_PAUSE_MS = 720;
     const SONG_END_MS = 1500;
     const BEETLE_CHANCE = 0.2;
@@ -1644,10 +1643,7 @@
       const heart = els.songHeart.getBoundingClientRect();
       const zone = els.songZone.getBoundingClientRect();
       if (heart.width < 2 || zone.width < 2) return false;
-      const inset = heart.width * 0.32;
-      const left = heart.left + inset;
-      const right = heart.right - inset;
-      return right >= zone.left && left <= zone.right;
+      return heart.right >= zone.left && heart.left <= zone.right;
     }
 
     function inSongZone() {
